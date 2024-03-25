@@ -8,7 +8,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -111,11 +110,11 @@ func printCreate(cmd *cobra.Command, keyOutput EthereumKeyOutput) error {
 	output, _ := cmd.Flags().GetString(cli.OutputFlag)
 
 	switch output {
-	case keys.OutputFormatText:
+	case "text":
 		cmd.PrintErrln()
 		cmd.Printf("private: %s \npublic: %s \naddress: %s\n", keyOutput.PrivateKey, keyOutput.PublicKey, keyOutput.Address)
 
-	case keys.OutputFormatJSON:
+	case "json":
 		outputBytes, err := json.Marshal(keyOutput)
 		if err != nil {
 			return err

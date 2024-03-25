@@ -26,7 +26,7 @@ func init() {
 	// The PR that removed it: https://github.com/cosmos/cosmos-sdk/pull/11240
 	// This PR was later reverted, bu RegisterProposalTypeCodec was still left out. Not sure if
 	// thsi was intentional or not.
-	govtypes.ModuleCdc.RegisterConcrete(&CommunityPoolEthereumSpendProposal{}, "gravity/CommunityPoolEthereumSpendProposal", nil)
+	// govtypes.ModuleCdc.RegisterConcrete(&CommunityPoolEthereumSpendProposal{}, "gravity/CommunityPoolEthereumSpendProposal", nil)
 }
 
 // NewCommunityPoolEthereumSpendProposal creates a new community pool spend proposal.

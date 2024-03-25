@@ -9,17 +9,18 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/ethereum/go-ethereum/common"
 	tmbytes "github.com/tendermint/tendermint/libs/bytes"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/peggyjv/gravity-bridge/module/v4/x/gravity/types"
 )
@@ -33,7 +34,7 @@ type Keeper struct {
 	accountKeeper          types.AccountKeeper
 	bankKeeper             types.BankKeeper
 	SlashingKeeper         types.SlashingKeeper
-	DistributionKeeper     types.DistributionKeeper
+	DistributionKeeper     distrkeeper.Keeper
 	PowerReduction         sdkmath.Int
 	hooks                  types.GravityHooks
 	ReceiverModuleAccounts map[string]string
@@ -49,7 +50,7 @@ func NewKeeper(
 	stakingKeeper types.StakingKeeper,
 	bankKeeper types.BankKeeper,
 	slashingKeeper types.SlashingKeeper,
-	distributionKeeper types.DistributionKeeper,
+	distributionKeeper distrkeeper.Keeper,
 	powerReduction sdkmath.Int,
 	receiverModuleAccounts map[string]string,
 	senderModuleAccounts map[string]string,
@@ -181,7 +182,7 @@ func (k Keeper) iterateEthereumSignatures(ctx sdk.Context, storeIndex []byte, cb
 
 func (k Keeper) IterateBatchTxEthereumSignatures(ctx sdk.Context, cb func(common.Address, uint64, sdk.ValAddress, []byte) bool) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, []byte{types.EthereumSignatureKey, types.BatchTxPrefixByte})
+	iter := storetypes.KVStorePrefixIterator(store, []byte{types.EthereumSignatureKey, types.BatchTxPrefixByte})
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -199,7 +200,7 @@ func (k Keeper) IterateBatchTxEthereumSignatures(ctx sdk.Context, cb func(common
 
 func (k Keeper) IterateContractCallTxEthereumSignatures(ctx sdk.Context, cb func([]byte, uint64, sdk.ValAddress, []byte) bool) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, []byte{types.EthereumSignatureKey, types.ContractCallTxPrefixByte})
+	iter := storetypes.KVStorePrefixIterator(store, []byte{types.EthereumSignatureKey, types.ContractCallTxPrefixByte})
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -217,7 +218,7 @@ func (k Keeper) IterateContractCallTxEthereumSignatures(ctx sdk.Context, cb func
 
 func (k Keeper) IterateSignerSetTxEthereumSignatures(ctx sdk.Context, cb func(uint64, sdk.ValAddress, []byte) bool) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, []byte{types.EthereumSignatureKey, types.SignerSetTxPrefixByte})
+	iter := storetypes.KVStorePrefixIterator(store, []byte{types.EthereumSignatureKey, types.SignerSetTxPrefixByte})
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -357,23 +358,35 @@ func (k Keeper) CreateSignerSetTx(ctx sdk.Context) *types.SignerSetTx {
 // point may cause consensus problems if different floating point unit
 // implementations are involved.
 func (k Keeper) CurrentSignerSet(ctx sdk.Context) types.EthereumSigners {
-	validators := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	validators, err := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	if err != nil {
+		panic(err)
+	}
 	ethereumSigners := make([]*types.EthereumSigner, 0)
 	var totalPower uint64
 	for _, validator := range validators {
 		val := validator.GetOperator()
+		valAddr, err := sdk.ValAddressFromBech32(val)
+		if err != nil {
+			panic(err)
+		}
+		p, err := k.StakingKeeper.GetLastValidatorPower(ctx, valAddr)
+		if err != nil {
+			panic(err)
+		}
 
-		p := uint64(k.StakingKeeper.GetLastValidatorPower(ctx, val))
-
-		if ethAddr := k.GetValidatorEthereumAddress(ctx, val); ethAddr.Hex() != "0x0000000000000000000000000000000000000000" {
-			es := &types.EthereumSigner{Power: p, EthereumAddress: ethAddr.Hex()}
+		if ethAddr := k.GetValidatorEthereumAddress(ctx, valAddr); ethAddr.Hex() != "0x0000000000000000000000000000000000000000" {
+			es := &types.EthereumSigner{Power: uint64(p), EthereumAddress: ethAddr.Hex()}
 			ethereumSigners = append(ethereumSigners, es)
-			totalPower += p
+			totalPower += uint64(p)
 		}
 	}
 	// normalize power values
 	for i := range ethereumSigners {
-		ethereumSigners[i].Power = sdk.NewUint(ethereumSigners[i].Power).MulUint64(math.MaxUint32).QuoUint64(totalPower).Uint64()
+		ethereumSigners[i].Power = sdkmath.NewInt(int64(ethereumSigners[i].Power)).
+			Mul(sdkmath.NewInt(math.MaxUint32)).
+			Quo(sdkmath.NewInt(int64(totalPower))).
+			Uint64()
 	}
 
 	return ethereumSigners
@@ -785,7 +798,7 @@ func (k Keeper) SetEthereumHeightVote(ctx sdk.Context, valAddress sdk.ValAddress
 
 func (k Keeper) IterateEthereumHeightVotes(ctx sdk.Context, cb func(val sdk.ValAddress, height types.LatestEthereumBlockHeight) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, []byte{types.EthereumHeightVoteKey})
+	iter := storetypes.KVStorePrefixIterator(store, []byte{types.EthereumHeightVoteKey})
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {

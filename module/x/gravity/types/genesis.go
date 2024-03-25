@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -96,20 +96,20 @@ func (gs *GenesisState) UnpackInterfaces(unpacker cdctypes.AnyUnpacker) error {
 	return nil
 }
 
-func EventVoteRecordPowerThreshold(totalPower sdk.Int) sdk.Int {
-	return sdk.NewInt(66).Mul(totalPower).Quo(sdk.NewInt(100))
+func EventVoteRecordPowerThreshold(totalPower math.Int) math.Int {
+	return math.NewInt(66).Mul(totalPower).Quo(math.NewInt(100))
 }
 
 // ValidateBasic validates genesis state by looping through the params and
 // calling their validation functions
 func (s GenesisState) ValidateBasic() error {
 	if err := s.Params.ValidateBasic(); err != nil {
-		return sdkerrors.Wrap(err, "params")
+		return errors.Wrap(err, "params")
 	}
 	if len(s.DelegateKeys) != 0 {
 		for _, delegateKey := range s.DelegateKeys {
 			if err := delegateKey.ValidateBasic(); err != nil {
-				return sdkerrors.Wrap(err, "delegates")
+				return errors.Wrap(err, "delegates")
 			}
 		}
 	}
@@ -135,10 +135,10 @@ func DefaultParams() *Params {
 		TargetEthTxTimeout:                        43200000,
 		AverageBlockTime:                          5000,
 		AverageEthereumBlockTime:                  15000,
-		SlashFractionSignerSetTx:                  sdk.NewDec(1).Quo(sdk.NewDec(1000)),
-		SlashFractionBatch:                        sdk.NewDec(1).Quo(sdk.NewDec(1000)),
-		SlashFractionEthereumSignature:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
-		SlashFractionConflictingEthereumSignature: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
+		SlashFractionSignerSetTx:                  math.LegacyNewDec(1).Quo(math.LegacyNewDec(1000)),
+		SlashFractionBatch:                        math.LegacyNewDec(1).Quo(math.LegacyNewDec(1000)),
+		SlashFractionEthereumSignature:            math.LegacyNewDec(1).Quo(math.LegacyNewDec(1000)),
+		SlashFractionConflictingEthereumSignature: math.LegacyNewDec(1).Quo(math.LegacyNewDec(1000)),
 		UnbondSlashingSignerSetTxsWindow:          10000,
 
 		// EthereumEventWindow's units are ethereum blocks. Ethereum block time is ~12 seconds, about twice as long as Sommelier.
@@ -150,55 +150,55 @@ func DefaultParams() *Params {
 // ValidateBasic checks that the parameters have valid values.
 func (p Params) ValidateBasic() error {
 	if err := validateGravityID(p.GravityId); err != nil {
-		return sdkerrors.Wrap(err, "gravity id")
+		return errors.Wrap(err, "gravity id")
 	}
 	if err := validateContractHash(p.ContractSourceHash); err != nil {
-		return sdkerrors.Wrap(err, "contract hash")
+		return errors.Wrap(err, "contract hash")
 	}
 	if err := validateBridgeContractAddress(p.BridgeEthereumAddress); err != nil {
-		return sdkerrors.Wrap(err, "bridge contract address")
+		return errors.Wrap(err, "bridge contract address")
 	}
 	if err := validateBridgeChainID(p.BridgeChainId); err != nil {
-		return sdkerrors.Wrap(err, "bridge chain id")
+		return errors.Wrap(err, "bridge chain id")
 	}
 	if err := validateTargetEthTxTimeout(p.TargetEthTxTimeout); err != nil {
-		return sdkerrors.Wrap(err, "Batch timeout")
+		return errors.Wrap(err, "Batch timeout")
 	}
 	if err := validateAverageBlockTime(p.AverageBlockTime); err != nil {
-		return sdkerrors.Wrap(err, "Block time")
+		return errors.Wrap(err, "Block time")
 	}
 	if err := validateAverageEthereumBlockTime(p.AverageEthereumBlockTime); err != nil {
-		return sdkerrors.Wrap(err, "Ethereum block time")
+		return errors.Wrap(err, "Ethereum block time")
 	}
 	if err := validateSignedSignerSetTxsWindow(p.SignedSignerSetTxsWindow); err != nil {
-		return sdkerrors.Wrap(err, "signed blocks window")
+		return errors.Wrap(err, "signed blocks window")
 	}
 	if err := validateSignedBatchesWindow(p.SignedBatchesWindow); err != nil {
-		return sdkerrors.Wrap(err, "signed blocks window")
+		return errors.Wrap(err, "signed blocks window")
 	}
 	if err := validateEthereumSignaturesWindow(p.EthereumSignaturesWindow); err != nil {
-		return sdkerrors.Wrap(err, "signed blocks window")
+		return errors.Wrap(err, "signed blocks window")
 	}
 	if err := validateSlashFractionSignerSetTx(p.SlashFractionSignerSetTx); err != nil {
-		return sdkerrors.Wrap(err, "slash fraction signersettx")
+		return errors.Wrap(err, "slash fraction signersettx")
 	}
 	if err := validateSlashFractionBatch(p.SlashFractionBatch); err != nil {
-		return sdkerrors.Wrap(err, "slash fraction batch tx")
+		return errors.Wrap(err, "slash fraction batch tx")
 	}
 	if err := validateSlashFractionEthereumSignature(p.SlashFractionEthereumSignature); err != nil {
-		return sdkerrors.Wrap(err, "slash fraction ethereum signature")
+		return errors.Wrap(err, "slash fraction ethereum signature")
 	}
 	if err := validateSlashFractionConflictingEthereumSignature(p.SlashFractionConflictingEthereumSignature); err != nil {
-		return sdkerrors.Wrap(err, "slash fraction conflicting ethereum signature")
+		return errors.Wrap(err, "slash fraction conflicting ethereum signature")
 	}
 	if err := validateUnbondSlashingSignerSetTxsWindow(p.UnbondSlashingSignerSetTxsWindow); err != nil {
-		return sdkerrors.Wrap(err, "unbond slashing signersettx window")
+		return errors.Wrap(err, "unbond slashing signersettx window")
 	}
 	if err := validateEthereumEventVoteWindow(p.EthereumEventVoteWindow); err != nil {
-		return sdkerrors.Wrap(err, "event vote window")
+		return errors.Wrap(err, "event vote window")
 	}
 	if err := validateConfirmedOutgoingTxWindow(p.ConfirmedOutgoingTxWindow); err != nil {
-		return sdkerrors.Wrap(err, "confirmed outgoing tx window")
+		return errors.Wrap(err, "confirmed outgoing tx window")
 	}
 
 	return nil
@@ -332,7 +332,7 @@ func validateUnbondSlashingSignerSetTxsWindow(i interface{}) error {
 
 func validateSlashFractionSignerSetTx(i interface{}) error {
 	// TODO: do we want to set some bounds on this value?
-	if _, ok := i.(sdk.Dec); !ok {
+	if _, ok := i.(math.LegacyDec); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil
@@ -356,7 +356,7 @@ func validateEthereumSignaturesWindow(i interface{}) error {
 
 func validateSlashFractionBatch(i interface{}) error {
 	// TODO: do we want to set some bounds on this value?
-	if _, ok := i.(sdk.Dec); !ok {
+	if _, ok := i.(math.LegacyDec); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil
@@ -364,7 +364,7 @@ func validateSlashFractionBatch(i interface{}) error {
 
 func validateSlashFractionEthereumSignature(i interface{}) error {
 	// TODO: do we want to set some bounds on this value?
-	if _, ok := i.(sdk.Dec); !ok {
+	if _, ok := i.(math.LegacyDec); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil
@@ -372,7 +372,7 @@ func validateSlashFractionEthereumSignature(i interface{}) error {
 
 func validateSlashFractionConflictingEthereumSignature(i interface{}) error {
 	// TODO: do we want to set some bounds on this value?
-	if _, ok := i.(sdk.Dec); !ok {
+	if _, ok := i.(math.LegacyDec); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil

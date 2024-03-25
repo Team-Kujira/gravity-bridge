@@ -7,7 +7,6 @@ import (
 	context "context"
 	fmt "fmt"
 	types1 "github.com/cosmos/cosmos-sdk/codec/types"
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	grpc1 "github.com/gogo/protobuf/grpc"
@@ -21,6 +20,7 @@ import (
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	sdkmath "cosmossdk.io/math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -856,7 +856,7 @@ func (m *DelegateKeysSignMsg) GetNonce() uint64 {
 type SendToCosmosEvent struct {
 	EventNonce     uint64                                 `protobuf:"varint,1,opt,name=event_nonce,json=eventNonce,proto3" json:"event_nonce,omitempty"`
 	TokenContract  string                                 `protobuf:"bytes,2,opt,name=token_contract,json=tokenContract,proto3" json:"token_contract,omitempty"`
-	Amount         github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,3,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"amount"`
+	Amount         sdkmath.Int `protobuf:"bytes,3,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"amount"`
 	EthereumSender string                                 `protobuf:"bytes,4,opt,name=ethereum_sender,json=ethereumSender,proto3" json:"ethereum_sender,omitempty"`
 	CosmosReceiver string                                 `protobuf:"bytes,5,opt,name=cosmos_receiver,json=cosmosReceiver,proto3" json:"cosmos_receiver,omitempty"`
 	EthereumHeight uint64                                 `protobuf:"varint,6,opt,name=ethereum_height,json=ethereumHeight,proto3" json:"ethereum_height,omitempty"`

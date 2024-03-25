@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
@@ -131,8 +132,8 @@ func TestBatchesFullCoins(t *testing.T) {
 		mySender, _         = sdk.AccAddressFromBech32("cosmos1ahx7f8wyertuus9r20284ej0asrs085case3kn")
 		myReceiver          = common.HexToAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr = common.HexToAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
-		totalCoins, _       = sdk.NewIntFromString("1500000000000000000000")                    // 1,500 ETH worth
-		oneEth, _           = sdk.NewIntFromString("1000000000000000000")
+		totalCoins, _       = math.NewIntFromString("1500000000000000000000")                   // 1,500 ETH worth
+		oneEth, _           = math.NewIntFromString("1000000000000000000")
 		allVouchers         = sdk.NewCoins(
 			types.NewSDKIntERC20Token(totalCoins, myTokenContractAddr).GravityCoin(),
 		)
@@ -149,7 +150,7 @@ func TestBatchesFullCoins(t *testing.T) {
 
 	// add some TX to the pool
 	for _, v := range []uint64{20, 300, 25, 10} {
-		vAsSDKInt := sdk.NewIntFromUint64(v)
+		vAsSDKInt := math.NewIntFromUint64(v)
 		amount := types.NewSDKIntERC20Token(oneEth.Mul(vAsSDKInt), myTokenContractAddr).GravityCoin()
 		fee := types.NewSDKIntERC20Token(oneEth.Mul(vAsSDKInt), myTokenContractAddr).GravityCoin()
 		_, err := input.GravityKeeper.createSendToEthereum(ctx, mySender, myReceiver.Hex(), amount, fee)
@@ -171,17 +172,17 @@ func TestBatchesFullCoins(t *testing.T) {
 		Transactions: []*types.SendToEthereum{
 			{
 				Id:                2,
-				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(300)), myTokenContractAddr),
+				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(300)), myTokenContractAddr),
 				Sender:            mySender.String(),
 				EthereumRecipient: myReceiver.Hex(),
-				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(300)), myTokenContractAddr),
+				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(300)), myTokenContractAddr),
 			},
 			{
 				Id:                3,
-				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(25)), myTokenContractAddr),
+				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(25)), myTokenContractAddr),
 				Sender:            mySender.String(),
 				EthereumRecipient: myReceiver.Hex(),
-				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(25)), myTokenContractAddr),
+				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(25)), myTokenContractAddr),
 			},
 		},
 		TokenContract: myTokenContractAddr.Hex(),
@@ -198,17 +199,17 @@ func TestBatchesFullCoins(t *testing.T) {
 	expUnbatchedTx := []*types.SendToEthereum{
 		{
 			Id:                1,
-			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(20)), myTokenContractAddr),
+			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(20)), myTokenContractAddr),
 			Sender:            mySender.String(),
 			EthereumRecipient: myReceiver.Hex(),
-			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(20)), myTokenContractAddr),
+			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(20)), myTokenContractAddr),
 		},
 		{
 			Id:                4,
-			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(10)), myTokenContractAddr),
+			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(10)), myTokenContractAddr),
 			Sender:            mySender.String(),
 			EthereumRecipient: myReceiver.Hex(),
-			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(10)), myTokenContractAddr),
+			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(10)), myTokenContractAddr),
 		},
 	}
 	assert.Equal(t, expUnbatchedTx, gotUnbatchedTx)
@@ -218,7 +219,7 @@ func TestBatchesFullCoins(t *testing.T) {
 
 	// add some more TX to the pool to create a more profitable batch
 	for _, v := range []uint64{4, 5} {
-		vAsSDKInt := sdk.NewIntFromUint64(v)
+		vAsSDKInt := math.NewIntFromUint64(v)
 		amount := types.NewSDKIntERC20Token(oneEth.Mul(vAsSDKInt), myTokenContractAddr).GravityCoin()
 		fee := types.NewSDKIntERC20Token(oneEth.Mul(vAsSDKInt), myTokenContractAddr).GravityCoin()
 		_, err := input.GravityKeeper.createSendToEthereum(ctx, mySender, myReceiver.Hex(), amount, fee)
@@ -236,17 +237,17 @@ func TestBatchesFullCoins(t *testing.T) {
 		Transactions: []*types.SendToEthereum{
 			{
 				Id:                1,
-				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(20)), myTokenContractAddr),
+				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(20)), myTokenContractAddr),
 				Sender:            mySender.String(),
 				EthereumRecipient: myReceiver.Hex(),
-				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(20)), myTokenContractAddr),
+				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(20)), myTokenContractAddr),
 			},
 			{
 				Id:                4,
-				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(10)), myTokenContractAddr),
+				Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(10)), myTokenContractAddr),
 				Sender:            mySender.String(),
 				EthereumRecipient: myReceiver.Hex(),
-				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(10)), myTokenContractAddr),
+				Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(10)), myTokenContractAddr),
 			},
 		},
 		TokenContract: myTokenContractAddr.Hex(),
@@ -274,31 +275,31 @@ func TestBatchesFullCoins(t *testing.T) {
 	expUnbatchedTx = []*types.SendToEthereum{
 		{
 			Id:                2,
-			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(300)), myTokenContractAddr),
+			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(300)), myTokenContractAddr),
 			Sender:            mySender.String(),
 			EthereumRecipient: myReceiver.Hex(),
-			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(300)), myTokenContractAddr),
+			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(300)), myTokenContractAddr),
 		},
 		{
 			Id:                3,
-			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(25)), myTokenContractAddr),
+			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(25)), myTokenContractAddr),
 			Sender:            mySender.String(),
 			EthereumRecipient: myReceiver.Hex(),
-			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(25)), myTokenContractAddr),
+			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(25)), myTokenContractAddr),
 		},
 		{
 			Id:                6,
-			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(5)), myTokenContractAddr),
+			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(5)), myTokenContractAddr),
 			Sender:            mySender.String(),
 			EthereumRecipient: myReceiver.Hex(),
-			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(5)), myTokenContractAddr),
+			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(5)), myTokenContractAddr),
 		},
 		{
 			Id:                5,
-			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(4)), myTokenContractAddr),
+			Erc20Fee:          types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(4)), myTokenContractAddr),
 			Sender:            mySender.String(),
 			EthereumRecipient: myReceiver.Hex(),
-			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(sdk.NewIntFromUint64(4)), myTokenContractAddr),
+			Erc20Token:        types.NewSDKIntERC20Token(oneEth.Mul(math.NewIntFromUint64(4)), myTokenContractAddr),
 		},
 	}
 	assert.Equal(t, expUnbatchedTx, gotUnbatchedTx)
@@ -352,7 +353,7 @@ func TestPoolTxRefund(t *testing.T) {
 
 	// make sure refund was issued
 	balances := input.BankKeeper.GetAllBalances(ctx, mySender)
-	require.Equal(t, sdk.NewInt(104), balances.AmountOf(myDenom))
+	require.Equal(t, math.NewInt(104), balances.AmountOf(myDenom))
 }
 
 func TestEmptyBatch(t *testing.T) {

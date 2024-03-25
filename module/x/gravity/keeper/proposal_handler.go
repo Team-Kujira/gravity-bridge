@@ -8,8 +8,10 @@ import (
 )
 
 func (k Keeper) HandleCommunityPoolEthereumSpendProposal(ctx sdk.Context, p *types.CommunityPoolEthereumSpendProposal) error {
-	feePool := k.DistributionKeeper.GetFeePool(ctx)
-
+	feePool, err := k.DistributionKeeper.FeePool.Get(ctx)
+	if err != nil {
+		return err
+	}
 	// NOTE the community pool isn't a module account, however its coins
 	// are held in the distribution module account. Thus the community pool
 	// must be reduced separately from the createSendToEthereum calls
@@ -27,7 +29,10 @@ func (k Keeper) HandleCommunityPoolEthereumSpendProposal(ctx sdk.Context, p *typ
 		return err
 	}
 
-	k.DistributionKeeper.SetFeePool(ctx, feePool)
+	err = k.DistributionKeeper.FeePool.Set(ctx, feePool)
+	if err != nil {
+		return err
+	}
 	k.Logger(ctx).Info("transfer from the community pool created as unbatched send to Ethereum", "tx ID", txID, "amount", p.Amount.String(), "recipient", p.Recipient)
 
 	return nil

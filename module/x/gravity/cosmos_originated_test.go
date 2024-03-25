@@ -3,6 +3,7 @@ package gravity_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/common"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -113,9 +114,9 @@ func lockCoinsInModule(tv *testingVars) {
 	var (
 		userCosmosAddr, _            = sdk.AccAddressFromBech32("cosmos1990z7dqsvh8gthw9pa5sn4wuy2xrsd80mg5z6y")
 		denom                        = "uatom"
-		startingCoinAmount sdk.Int   = sdk.NewIntFromUint64(150)
-		sendAmount         sdk.Int   = sdk.NewIntFromUint64(50)
-		feeAmount          sdk.Int   = sdk.NewIntFromUint64(5)
+		startingCoinAmount math.Int  = math.NewIntFromUint64(150)
+		sendAmount         math.Int  = math.NewIntFromUint64(50)
+		feeAmount          math.Int  = math.NewIntFromUint64(5)
 		startingCoins      sdk.Coins = sdk.Coins{sdk.NewCoin(denom, startingCoinAmount)}
 		sendingCoin        sdk.Coin  = sdk.NewCoin(denom, sendAmount)
 		feeCoin            sdk.Coin  = sdk.NewCoin(denom, feeAmount)
@@ -160,7 +161,7 @@ func acceptDepositEvent(tv *testingVars) {
 	)
 
 	myErc20 := types.ERC20Token{
-		Amount:   sdk.NewInt(12),
+		Amount:   math.NewInt(12),
 		Contract: tv.erc20,
 	}
 
@@ -193,7 +194,7 @@ func acceptDepositEvent(tv *testingVars) {
 	// Check that gravity balance has gone down
 	gravityAddr := tv.input.AccountKeeper.GetModuleAddress(types.ModuleName)
 	assert.Equal(tv.t,
-		sdk.Coins{sdk.NewCoin(tv.denom, sdk.NewIntFromUint64(55).Sub(myErc20.Amount))},
+		sdk.Coins{sdk.NewCoin(tv.denom, math.NewIntFromUint64(55).Sub(myErc20.Amount))},
 		tv.input.BankKeeper.GetAllBalances(tv.ctx, gravityAddr),
 	)
 }

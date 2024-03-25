@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	"github.com/gogo/protobuf/proto"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -78,12 +79,12 @@ func RegisterInterfaces(registry types.InterfaceRegistry) {
 func PackEvent(event EthereumEvent) (*types.Any, error) {
 	msg, ok := event.(proto.Message)
 	if !ok {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrPackAny, "cannot proto marshal %T", event)
+		return nil, errors.Wrapf(sdkerrors.ErrPackAny, "cannot proto marshal %T", event)
 	}
 
 	anyEvent, err := types.NewAnyWithValue(msg)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrPackAny, err.Error())
+		return nil, errors.Wrap(sdkerrors.ErrPackAny, err.Error())
 	}
 
 	return anyEvent, nil
@@ -93,12 +94,12 @@ func PackEvent(event EthereumEvent) (*types.Any, error) {
 // event can't be unpacked.
 func UnpackEvent(any *types.Any) (EthereumEvent, error) {
 	if any == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnpackAny, "protobuf Any message cannot be nil")
+		return nil, errors.Wrap(sdkerrors.ErrUnpackAny, "protobuf Any message cannot be nil")
 	}
 
 	event, ok := any.GetCachedValue().(EthereumEvent)
 	if !ok {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnpackAny, "cannot unpack Any into EthereumEvent %T", any)
+		return nil, errors.Wrapf(sdkerrors.ErrUnpackAny, "cannot unpack Any into EthereumEvent %T", any)
 	}
 
 	return event, nil
@@ -107,12 +108,12 @@ func UnpackEvent(any *types.Any) (EthereumEvent, error) {
 func PackConfirmation(confirmation EthereumTxConfirmation) (*types.Any, error) {
 	msg, ok := confirmation.(proto.Message)
 	if !ok {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrPackAny, "cannot proto marshal %T", confirmation)
+		return nil, errors.Wrapf(sdkerrors.ErrPackAny, "cannot proto marshal %T", confirmation)
 	}
 
 	anyEvent, err := types.NewAnyWithValue(msg)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrPackAny, err.Error())
+		return nil, errors.Wrap(sdkerrors.ErrPackAny, err.Error())
 	}
 
 	return anyEvent, nil
@@ -122,12 +123,12 @@ func PackConfirmation(confirmation EthereumTxConfirmation) (*types.Any, error) {
 // confirmation can't be unpacked.
 func UnpackConfirmation(any *types.Any) (EthereumTxConfirmation, error) {
 	if any == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnpackAny, "protobuf Any message cannot be nil")
+		return nil, errors.Wrap(sdkerrors.ErrUnpackAny, "protobuf Any message cannot be nil")
 	}
 
 	confirm, ok := any.GetCachedValue().(EthereumTxConfirmation)
 	if !ok {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnpackAny, "cannot unpack Any into EthereumSignature %T", any)
+		return nil, errors.Wrapf(sdkerrors.ErrUnpackAny, "cannot unpack Any into EthereumSignature %T", any)
 	}
 
 	return confirm, nil
@@ -136,12 +137,12 @@ func UnpackConfirmation(any *types.Any) (EthereumTxConfirmation, error) {
 func PackOutgoingTx(outgoing OutgoingTx) (*types.Any, error) {
 	msg, ok := outgoing.(proto.Message)
 	if !ok {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrPackAny, "cannot proto marshal %T", outgoing)
+		return nil, errors.Wrapf(sdkerrors.ErrPackAny, "cannot proto marshal %T", outgoing)
 	}
 
 	anyEvent, err := types.NewAnyWithValue(msg)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrPackAny, err.Error())
+		return nil, errors.Wrap(sdkerrors.ErrPackAny, err.Error())
 	}
 
 	return anyEvent, nil
@@ -149,12 +150,12 @@ func PackOutgoingTx(outgoing OutgoingTx) (*types.Any, error) {
 
 func UnpackOutgoingTx(any *types.Any) (OutgoingTx, error) {
 	if any == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnpackAny, "protobuf Any message cannot be nil")
+		return nil, errors.Wrap(sdkerrors.ErrUnpackAny, "protobuf Any message cannot be nil")
 	}
 
 	confirm, ok := any.GetCachedValue().(OutgoingTx)
 	if !ok {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnpackAny, "cannot unpack Any into OutgoingTx %T", any)
+		return nil, errors.Wrapf(sdkerrors.ErrUnpackAny, "cannot unpack Any into OutgoingTx %T", any)
 	}
 
 	return confirm, nil

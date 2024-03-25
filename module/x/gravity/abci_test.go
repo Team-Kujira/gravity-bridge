@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -39,7 +40,7 @@ func TestSignerSetTxCreationUponUnbonding(t *testing.T) {
 
 	smallValAddr := keeper.ValAddrs[4]
 	smallVal, _ := input.StakingKeeper.GetValidator(input.Context, smallValAddr)
-	unbondAmount := sdk.NewDec(smallVal.GetBondedTokens().Int64())
+	unbondAmount := math.LegacyNewDec(smallVal.GetBondedTokens().Int64())
 	_, err := input.StakingKeeper.Undelegate(
 		input.Context,
 		sdk.AccAddress(smallValAddr),
@@ -68,7 +69,7 @@ func TestSignerSetTxCreationUponUnbonding(t *testing.T) {
 
 	input.Context = input.Context.WithBlockHeight(input.Context.BlockHeight() + 1)
 
-	undelegateAmount := sdk.NewDec(keeper.StakingAmount.Quo(sdk.NewInt(3)).Int64())
+	undelegateAmount := math.LegacyNewDec(keeper.StakingAmount.Quo(math.NewInt(3)).Int64())
 	_, err = input.StakingKeeper.Undelegate(
 		input.Context,
 		sdk.AccAddress(keeper.ValAddrs[0]),
@@ -172,8 +173,8 @@ func TestSignerSetTxSlashing_UnbondingValidator_UnbondWindow_NotExpired(t *testi
 	// Validator-1  Unbond slash window is not expired. if not attested, slash
 	// Validator-2  Unbond slash window is not expired. if attested, don't slash
 	input.Context = ctx.WithBlockHeight(valUnbondingHeight)
-	input.StakingKeeper.Undelegate(input.Context, sdk.AccAddress(keeper.ValAddrs[0]), keeper.ValAddrs[0], sdk.NewDec(keeper.StakingAmount.Int64()))
-	input.StakingKeeper.Undelegate(input.Context, sdk.AccAddress(keeper.ValAddrs[1]), keeper.ValAddrs[1], sdk.NewDec(keeper.StakingAmount.Int64()))
+	input.StakingKeeper.Undelegate(input.Context, sdk.AccAddress(keeper.ValAddrs[0]), keeper.ValAddrs[0], math.LegacyNewDec(keeper.StakingAmount.Int64()))
+	input.StakingKeeper.Undelegate(input.Context, sdk.AccAddress(keeper.ValAddrs[1]), keeper.ValAddrs[1], math.LegacyNewDec(keeper.StakingAmount.Int64()))
 
 	for i, val := range keeper.ValAddrs {
 		if i == 0 {

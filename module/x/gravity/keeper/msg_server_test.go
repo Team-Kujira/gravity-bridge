@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -99,15 +100,15 @@ func TestMsgServer_SendToEthereum(t *testing.T) {
 
 		balance = sdk.Coin{
 			Denom:  testDenom,
-			Amount: sdk.NewInt(10000),
+			Amount: math.NewInt(10000),
 		}
 		amount = sdk.Coin{
 			Denom:  testDenom,
-			Amount: sdk.NewInt(1000),
+			Amount: math.NewInt(1000),
 		}
 		fee = sdk.Coin{
 			Denom:  testDenom,
-			Amount: sdk.NewInt(10),
+			Amount: math.NewInt(10),
 		}
 	)
 
@@ -164,15 +165,15 @@ func TestMsgServer_CancelSendToEthereum(t *testing.T) {
 
 		balance = sdk.Coin{
 			Denom:  testDenom,
-			Amount: sdk.NewInt(10000),
+			Amount: math.NewInt(10000),
 		}
 		amount = sdk.Coin{
 			Denom:  testDenom,
-			Amount: sdk.NewInt(1000),
+			Amount: math.NewInt(1000),
 		}
 		fee = sdk.Coin{
 			Denom:  testDenom,
-			Amount: sdk.NewInt(10),
+			Amount: math.NewInt(10),
 		}
 	)
 
@@ -248,7 +249,7 @@ func TestMsgServer_SubmitEthereumEvent(t *testing.T) {
 	sendToCosmosEvent := &types.SendToCosmosEvent{
 		EventNonce:     1,
 		TokenContract:  testContract.Hex(),
-		Amount:         sdk.NewInt(1000),
+		Amount:         math.NewInt(1000),
 		EthereumSender: ethAddr1.String(),
 		CosmosReceiver: orcAddr1.String(),
 		EthereumHeight: 200,

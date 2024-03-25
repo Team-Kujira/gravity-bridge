@@ -3,6 +3,7 @@ package gravity
 import (
 	"sort"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/peggyjv/gravity-bridge/module/v4/x/gravity/keeper"
@@ -203,19 +204,23 @@ func updateObservedEthereumHeight(ctx sdk.Context, k keeper.Keeper) {
 		return
 	}
 
-	ethereumHeightPowers := make(map[uint64]sdk.Int)
-	cosmosHeightPowers := make(map[uint64]sdk.Int)
+	ethereumHeightPowers := make(map[uint64]math.Int)
+	cosmosHeightPowers := make(map[uint64]math.Int)
 	// we can use the same value as event vote records for this threshold
-	requiredPower := types.EventVoteRecordPowerThreshold(k.StakingKeeper.GetLastTotalPower(ctx))
+	lastTotalPower, err := k.StakingKeeper.GetLastTotalPower(ctx)
+	if err != nil {
+		panic(err)
+	}
+	requiredPower := types.EventVoteRecordPowerThreshold(lastTotalPower)
 
 	// populate the list
 	k.IterateEthereumHeightVotes(ctx, func(valAddres sdk.ValAddress, height types.LatestEthereumBlockHeight) bool {
 		if _, ok := ethereumHeightPowers[height.EthereumHeight]; !ok {
-			ethereumHeightPowers[height.EthereumHeight] = sdk.NewInt(0)
+			ethereumHeightPowers[height.EthereumHeight] = math.NewInt(0)
 		}
 
 		if _, ok := cosmosHeightPowers[height.CosmosHeight]; !ok {
-			cosmosHeightPowers[height.CosmosHeight] = sdk.NewInt(0)
+			cosmosHeightPowers[height.CosmosHeight] = math.NewInt(0)
 		}
 
 		return false
@@ -223,7 +228,11 @@ func updateObservedEthereumHeight(ctx sdk.Context, k keeper.Keeper) {
 
 	// vote on acceptable height values (less than or equal to the validator's observed value)
 	k.IterateEthereumHeightVotes(ctx, func(valAddress sdk.ValAddress, height types.LatestEthereumBlockHeight) bool {
-		validatorPower := sdk.NewInt(k.StakingKeeper.GetLastValidatorPower(ctx, valAddress))
+		lastValPower, err := k.StakingKeeper.GetLastValidatorPower(ctx, valAddress)
+		if err != nil {
+			panic(err)
+		}
+		validatorPower := math.NewInt(lastValPower)
 
 		for ethereumVoteHeight, ethereumPower := range ethereumHeightPowers {
 			if ethereumVoteHeight <= height.EthereumHeight {
@@ -338,7 +347,7 @@ func outgoingTxSlashing(ctx sdk.Context, k keeper.Keeper) {
 		for i, validator := range bondedValidators {
 			vsi := bondedValidatorSlashingInfos[i]
 			eligibleSigner := vsi.Exists && (vsi.SigningInfo.StartHeight < otxHeight)
-			_, signedTx := signatures[validator.GetOperator().String()]
+			_, signedTx := signatures[validator.GetOperator()]
 
 			if eligibleSigner && !signedTx {
 				k.SlashAndJail(ctx, validator, types.AttributeMissingSignature)
@@ -351,7 +360,7 @@ func outgoingTxSlashing(ctx sdk.Context, k keeper.Keeper) {
 				vsi := unbondingValidatorSlashingInfos[i]
 				eligibleSigner := vsi.Exists && (vsi.SigningInfo.StartHeight < otxHeight)
 				deadlinePassed := otxHeight < validator.UnbondingHeight+int64(params.UnbondSlashingSignerSetTxsWindow)
-				_, signedTx := signatures[validator.GetOperator().String()]
+				_, signedTx := signatures[validator.GetOperator()]
 
 				if eligibleSigner && validator.IsUnbonding() && deadlinePassed && !signedTx {
 					k.SlashAndJail(ctx, validator, types.AttributeMissingSignerSetSignature)

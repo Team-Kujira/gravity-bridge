@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -62,7 +63,7 @@ func TestAttestationIterator(t *testing.T) {
 	dep1 := &types.SendToCosmosEvent{
 		EventNonce:     1,
 		TokenContract:  TokenContractAddrs[0],
-		Amount:         sdk.NewInt(100),
+		Amount:         math.NewInt(100),
 		EthereumSender: EthAddrs[0].String(),
 		CosmosReceiver: AccAddrs[0].String(),
 	}
@@ -73,7 +74,7 @@ func TestAttestationIterator(t *testing.T) {
 	dep2 := &types.SendToCosmosEvent{
 		EventNonce:     2,
 		TokenContract:  TokenContractAddrs[0],
-		Amount:         sdk.NewInt(100),
+		Amount:         math.NewInt(100),
 		EthereumSender: EthAddrs[0].String(),
 		CosmosReceiver: AccAddrs[0].String(),
 	}
@@ -150,7 +151,7 @@ func TestStoreEventVoteRecord(t *testing.T) {
 		EthereumSender: EthAddrs[0].Hex(),
 		CosmosReceiver: AccAddrs[0].String(),
 		EthereumHeight: 10,
-		Amount:         sdk.NewInt(1000000),
+		Amount:         math.NewInt(1000000),
 	}
 	stcea, err := types.PackEvent(stce)
 	require.NoError(t, err)
@@ -525,7 +526,7 @@ func TestKeeper_Migration(t *testing.T) {
 		EthereumSender: EthAddrs[0].Hex(),
 		CosmosReceiver: AccAddrs[0].String(),
 		EthereumHeight: 10,
-		Amount:         sdk.NewInt(1000000),
+		Amount:         math.NewInt(1000000),
 	}
 	stcea, err := types.PackEvent(stce)
 	require.NoError(t, err)

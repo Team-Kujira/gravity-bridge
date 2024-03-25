@@ -1,10 +1,12 @@
 package v2
 
 import (
+	"context"
+
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	gravitytypes "github.com/peggyjv/gravity-bridge/module/v4/x/gravity/types"
 )
 
@@ -13,24 +15,15 @@ func CreateUpgradeHandler(
 	configurator module.Configurator,
 	bankKeeper bankkeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(goCtx context.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+		ctx := sdk.UnwrapSDKContext(goCtx)
 		ctx.Logger().Info("v2 upgrade: entering handler")
-
-		// Since this is the first in-place upgrade and InitChainer was not set up for this at genesis
-		// time, we must initialize the VM map ourselves.
-		fromVM := make(map[string]uint64)
-		for moduleName, module := range mm.Modules {
-			fromVM[moduleName] = module.ConsensusVersion()
-		}
-
-		// Overwrite the gravity module's version back to 1 so the migration will run to v2
-		fromVM[gravitytypes.ModuleName] = 1
 
 		ctx.Logger().Info("v2 upgrade: normalizing gravity denoms in bank balances")
 		normalizeGravityDenoms(ctx, bankKeeper)
 
 		ctx.Logger().Info("v2 upgrade: running migrations and exiting handler")
-		return mm.RunMigrations(ctx, configurator, fromVM)
+		return mm.RunMigrations(ctx, configurator, vm)
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"math"
 	"sort"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -123,8 +124,8 @@ func NewSignerSetTx(nonce, height uint64, members EthereumSigners) *SignerSetTx 
 }
 
 // GetFees returns the total fees contained within a given batch
-func (b BatchTx) GetFees() sdk.Int {
-	sum := sdk.ZeroInt()
+func (b BatchTx) GetFees() sdkmath.Int {
+	sum := sdkmath.ZeroInt()
 	for _, t := range b.Transactions {
 		sum.Add(t.Erc20Fee.Amount)
 	}

@@ -3,6 +3,7 @@ package keeper
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/peggyjv/gravity-bridge/module/v4/x/gravity/types"
@@ -31,7 +32,7 @@ func TestContractCallTxExecuted(t *testing.T) {
 	erc20Tokens := []types.ERC20Token{
 		{
 			Contract: "0x2a24af0501a534fca004ee1bd667b783f205a546",
-			Amount:   sdk.NewInt(1),
+			Amount:   math.NewInt(1),
 		},
 	}
 

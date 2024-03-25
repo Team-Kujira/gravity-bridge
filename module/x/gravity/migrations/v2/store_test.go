@@ -3,8 +3,8 @@ package v2_test
 import (
 	"testing"
 
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	v2 "github.com/peggyjv/gravity-bridge/module/v4/x/gravity/migrations/v2"
