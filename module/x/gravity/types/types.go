@@ -6,8 +6,9 @@ import (
 	"math"
 	"sort"
 
+	"cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -18,7 +19,7 @@ import (
 // ValidateBasic performs stateless checks on validity
 func (b *EthereumSigner) ValidateBasic() error {
 	if !common.IsHexAddress(b.EthereumAddress) {
-		return sdkerrors.Wrap(ErrInvalid, "ethereum address")
+		return errors.Wrap(ErrInvalid, "ethereum address")
 	}
 	return nil
 }
@@ -123,8 +124,8 @@ func NewSignerSetTx(nonce, height uint64, members EthereumSigners) *SignerSetTx 
 }
 
 // GetFees returns the total fees contained within a given batch
-func (b BatchTx) GetFees() sdk.Int {
-	sum := sdk.ZeroInt()
+func (b BatchTx) GetFees() sdkmath.Int {
+	sum := sdkmath.ZeroInt()
 	for _, t := range b.Transactions {
 		sum.Add(t.Erc20Fee.Amount)
 	}

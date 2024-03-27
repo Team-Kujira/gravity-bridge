@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/peggyjv/gravity-bridge/module/v4/x/gravity/keeper"
@@ -17,7 +18,7 @@ func TestV2UpgradeDenomNormalization(t *testing.T) {
 
 	addr, _ := sdk.AccAddressFromBech32("cosmos1ahx7f8wyertuus9r20284ej0asrs085case3kn")
 	erc20contract := common.HexToAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5")
-	amount := sdk.NewInt(1000)
+	amount := math.NewInt(1000)
 
 	// mint some tokens
 	incorrectDenom := strings.ToLower(types.GravityDenom(erc20contract))

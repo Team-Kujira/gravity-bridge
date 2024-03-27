@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	"cosmossdk.io/errors"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -41,13 +42,13 @@ func (msg *MsgDelegateKeys) Type() string { return "delegate_keys" }
 // ValidateBasic performs stateless checks
 func (msg *MsgDelegateKeys) ValidateBasic() (err error) {
 	if _, err = sdk.ValAddressFromBech32(msg.ValidatorAddress); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.ValidatorAddress)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.ValidatorAddress)
 	}
 	if _, err = sdk.AccAddressFromBech32(msg.OrchestratorAddress); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.OrchestratorAddress)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.OrchestratorAddress)
 	}
 	if !common.IsHexAddress(msg.EthereumAddress) {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "ethereum address")
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "ethereum address")
 	}
 	if len(msg.EthSignature) == 0 {
 		return fmt.Errorf("empty signature")
@@ -79,7 +80,7 @@ func (msg *MsgSubmitEthereumEvent) Type() string { return "submit_ethereum_event
 // ValidateBasic performs stateless checks
 func (msg *MsgSubmitEthereumEvent) ValidateBasic() (err error) {
 	if _, err = sdk.AccAddressFromBech32(msg.Signer); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Signer)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.Signer)
 	}
 
 	event, err := UnpackEvent(msg.Event)
@@ -118,7 +119,7 @@ func (msg *MsgSubmitEthereumTxConfirmation) Type() string { return "submit_ether
 // ValidateBasic performs stateless checks
 func (msg *MsgSubmitEthereumTxConfirmation) ValidateBasic() (err error) {
 	if _, err = sdk.AccAddressFromBech32(msg.Signer); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Signer)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.Signer)
 	}
 
 	event, err := UnpackConfirmation(msg.Confirmation)
@@ -170,24 +171,24 @@ func (msg MsgSendToEthereum) Type() string { return "send_to_eth" }
 // Checks if the Eth address is valid
 func (msg MsgSendToEthereum) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Sender); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Sender)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.Sender)
 	}
 
 	// fee and send must be of the same denom
 	// this check is VERY IMPORTANT
 	if msg.Amount.Denom != msg.BridgeFee.Denom {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins,
+		return errors.Wrap(sdkerrors.ErrInvalidCoins,
 			fmt.Sprintf("fee and amount must be the same type %s != %s", msg.Amount.Denom, msg.BridgeFee.Denom))
 	}
 
 	if !msg.Amount.IsValid() || msg.Amount.IsZero() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "amount")
+		return errors.Wrap(sdkerrors.ErrInvalidCoins, "amount")
 	}
 	if !msg.BridgeFee.IsValid() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "fee")
+		return errors.Wrap(sdkerrors.ErrInvalidCoins, "fee")
 	}
 	if !common.IsHexAddress(msg.EthereumRecipient) {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "ethereum address")
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "ethereum address")
 	}
 
 	return nil
@@ -225,10 +226,10 @@ func (msg MsgRequestBatchTx) Type() string { return "request_batch" }
 // ValidateBasic performs stateless checks
 func (msg MsgRequestBatchTx) ValidateBasic() error {
 	if err := sdk.ValidateDenom(msg.Denom); err != nil {
-		return sdkerrors.Wrap(err, "denom is invalid")
+		return errors.Wrap(err, "denom is invalid")
 	}
 	if _, err := sdk.AccAddressFromBech32(msg.Signer); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Signer)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.Signer)
 	}
 	return nil
 }
@@ -268,7 +269,7 @@ func (msg MsgCancelSendToEthereum) ValidateBasic() error {
 		return fmt.Errorf("Id cannot be 0")
 	}
 	if _, err := sdk.AccAddressFromBech32(msg.Sender); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Sender)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.Sender)
 	}
 	return nil
 }

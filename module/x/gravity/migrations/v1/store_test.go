@@ -3,7 +3,7 @@ package v1_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/common"
 	v1 "github.com/peggyjv/gravity-bridge/module/v4/x/gravity/migrations/v1"
 	"github.com/peggyjv/gravity-bridge/module/v4/x/gravity/migrations/v1/keeper"
@@ -44,7 +44,7 @@ func TestMigrateContractCallTxTimeout(t *testing.T) {
 
 	erc20Token := types.ERC20Token{
 		Contract: tokenContractString,
-		Amount:   sdk.NewInt(1),
+		Amount:   math.NewInt(1),
 	}
 
 	otx := &types.ContractCallTx{

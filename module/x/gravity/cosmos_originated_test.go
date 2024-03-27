@@ -3,6 +3,7 @@ package gravity_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/common"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -36,7 +37,7 @@ type testingVars struct {
 	denom              string
 	input              keeper.TestInput
 	ctx                sdk.Context
-	h                  sdk.Handler
+	msgServer          types.MsgServer
 	t                  *testing.T
 }
 
@@ -55,7 +56,7 @@ func initializeTestingVars(t *testing.T) *testingVars {
 	tv.ctx = tv.input.Context
 	tv.input.GravityKeeper.StakingKeeper = keeper.NewStakingKeeperMock(tv.myValAddr)
 	tv.input.GravityKeeper.SetOrchestratorValidatorAddress(tv.ctx, tv.myValAddr, tv.myOrchestratorAddr)
-	tv.h = gravity.NewHandler(tv.input.GravityKeeper)
+	tv.msgServer = keeper.NewMsgServerImpl(tv.input.GravityKeeper)
 
 	return &tv
 }
@@ -88,7 +89,7 @@ func addDenomToERC20Relation(tv *testingVars) {
 
 	msgSumbitEvent := &types.MsgSubmitEthereumEvent{Event: eva, Signer: tv.myOrchestratorAddr.String()}
 
-	_, err = tv.h(tv.ctx, msgSumbitEvent)
+	_, err = tv.msgServer.SubmitEthereumEvent(tv.ctx, msgSumbitEvent)
 	require.NoError(tv.t, err)
 
 	gravity.EndBlocker(tv.ctx, tv.input.GravityKeeper)
@@ -113,9 +114,9 @@ func lockCoinsInModule(tv *testingVars) {
 	var (
 		userCosmosAddr, _            = sdk.AccAddressFromBech32("cosmos1990z7dqsvh8gthw9pa5sn4wuy2xrsd80mg5z6y")
 		denom                        = "uatom"
-		startingCoinAmount sdk.Int   = sdk.NewIntFromUint64(150)
-		sendAmount         sdk.Int   = sdk.NewIntFromUint64(50)
-		feeAmount          sdk.Int   = sdk.NewIntFromUint64(5)
+		startingCoinAmount math.Int  = math.NewIntFromUint64(150)
+		sendAmount         math.Int  = math.NewIntFromUint64(50)
+		feeAmount          math.Int  = math.NewIntFromUint64(5)
 		startingCoins      sdk.Coins = sdk.Coins{sdk.NewCoin(denom, startingCoinAmount)}
 		sendingCoin        sdk.Coin  = sdk.NewCoin(denom, sendAmount)
 		feeCoin            sdk.Coin  = sdk.NewCoin(denom, feeAmount)
@@ -136,7 +137,7 @@ func lockCoinsInModule(tv *testingVars) {
 		BridgeFee:         feeCoin,
 	}
 
-	_, err := tv.h(tv.ctx, msg)
+	_, err := tv.msgServer.SendToEthereum(tv.ctx, msg)
 	require.NoError(tv.t, err)
 
 	// Check that user balance has gone down
@@ -160,7 +161,7 @@ func acceptDepositEvent(tv *testingVars) {
 	)
 
 	myErc20 := types.ERC20Token{
-		Amount:   sdk.NewInt(12),
+		Amount:   math.NewInt(12),
 		Contract: tv.erc20,
 	}
 
@@ -176,8 +177,8 @@ func acceptDepositEvent(tv *testingVars) {
 	eva, err := types.PackEvent(sendToCosmosEvent)
 	require.NoError(tv.t, err)
 
-	msgSubmitEvent := &types.MsgSubmitEthereumEvent{eva, myOrchestratorAddr.String()}
-	_, err = tv.h(tv.ctx, msgSubmitEvent)
+	msgSubmitEvent := &types.MsgSubmitEthereumEvent{Event: eva, Signer: myOrchestratorAddr.String()}
+	_, err = tv.msgServer.SubmitEthereumEvent(tv.ctx, msgSubmitEvent)
 	require.NoError(tv.t, err)
 	gravity.EndBlocker(tv.ctx, tv.input.GravityKeeper)
 
@@ -193,7 +194,7 @@ func acceptDepositEvent(tv *testingVars) {
 	// Check that gravity balance has gone down
 	gravityAddr := tv.input.AccountKeeper.GetModuleAddress(types.ModuleName)
 	assert.Equal(tv.t,
-		sdk.Coins{sdk.NewCoin(tv.denom, sdk.NewIntFromUint64(55).Sub(myErc20.Amount))},
+		sdk.Coins{sdk.NewCoin(tv.denom, math.NewIntFromUint64(55).Sub(myErc20.Amount))},
 		tv.input.BankKeeper.GetAllBalances(tv.ctx, gravityAddr),
 	)
 }

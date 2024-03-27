@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -49,12 +50,12 @@ func EthereumAddrLessThan(e, o string) bool {
 // NewERC20Token returns a new instance of an ERC20
 func NewERC20Token(amount uint64, contract common.Address) ERC20Token {
 	return ERC20Token{
-		Amount:   sdk.NewIntFromUint64(amount),
+		Amount:   math.NewIntFromUint64(amount),
 		Contract: contract.Hex(),
 	}
 }
 
-func NewSDKIntERC20Token(amount sdk.Int, contract common.Address) ERC20Token {
+func NewSDKIntERC20Token(amount math.Int, contract common.Address) ERC20Token {
 	return ERC20Token{
 		Amount:   amount,
 		Contract: contract.Hex(),

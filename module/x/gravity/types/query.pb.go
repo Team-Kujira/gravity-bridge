@@ -7,11 +7,10 @@ import (
 	context "context"
 	fmt "fmt"
 	types1 "github.com/cosmos/cosmos-sdk/codec/types"
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	grpc1 "github.com/cosmos/gogoproto/grpc"
 	types "github.com/cosmos/cosmos-sdk/types"
 	query "github.com/cosmos/cosmos-sdk/types/query"
 	_ "github.com/gogo/protobuf/gogoproto"
-	grpc1 "github.com/gogo/protobuf/grpc"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/regen-network/cosmos-proto"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
@@ -34,7 +33,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// rpc Params
+//  rpc Params
 type ParamsRequest struct {
 }
 
@@ -115,7 +114,7 @@ func (m *ParamsResponse) GetParams() Params {
 	return Params{}
 }
 
-// rpc SignerSetTx
+//  rpc SignerSetTx
 type SignerSetTxRequest struct {
 	SignerSetNonce uint64 `protobuf:"varint,1,opt,name=signer_set_nonce,json=signerSetNonce,proto3" json:"signer_set_nonce,omitempty"`
 }
@@ -240,7 +239,7 @@ func (m *SignerSetTxResponse) GetSignerSet() *SignerSetTx {
 	return nil
 }
 
-// rpc BatchTx
+//  rpc BatchTx
 type BatchTxRequest struct {
 	TokenContract string `protobuf:"bytes,1,opt,name=token_contract,json=tokenContract,proto3" json:"token_contract,omitempty"`
 	BatchNonce    uint64 `protobuf:"varint,2,opt,name=batch_nonce,json=batchNonce,proto3" json:"batch_nonce,omitempty"`
@@ -337,7 +336,7 @@ func (m *BatchTxResponse) GetBatch() *BatchTx {
 	return nil
 }
 
-// rpc ContractCallTx
+//  rpc ContractCallTx
 type ContractCallTxRequest struct {
 	InvalidationScope []byte `protobuf:"bytes,1,opt,name=invalidation_scope,json=invalidationScope,proto3" json:"invalidation_scope,omitempty"`
 	InvalidationNonce uint64 `protobuf:"varint,2,opt,name=invalidation_nonce,json=invalidationNonce,proto3" json:"invalidation_nonce,omitempty"`
@@ -523,7 +522,7 @@ func (m *SignerSetTxConfirmationsResponse) GetSignatures() []*SignerSetTxConfirm
 	return nil
 }
 
-// rpc SignerSetTxs
+//  rpc SignerSetTxs
 type SignerSetTxsRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -620,7 +619,7 @@ func (m *SignerSetTxsResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// rpc BatchTxs
+//  rpc BatchTxs
 type BatchTxsRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -717,7 +716,7 @@ func (m *BatchTxsResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// rpc ContractCallTxs
+//  rpc ContractCallTxs
 type ContractCallTxsRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -996,7 +995,7 @@ func (m *UnsignedBatchTxsResponse) GetBatches() []*BatchTx {
 	return nil
 }
 
-// rpc UnsignedContractCallTxs
+//  rpc UnsignedContractCallTxs
 type UnsignedContractCallTxsRequest struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 }
@@ -1122,7 +1121,7 @@ func (m *BatchTxFeesRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_BatchTxFeesRequest proto.InternalMessageInfo
 
 type BatchTxFeesResponse struct {
-	Fees github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=fees,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"fees"`
+	Fees []types.Coin `protobuf:"bytes,1,rep,name=fees,proto3" json:"fees"`
 }
 
 func (m *BatchTxFeesResponse) Reset()         { *m = BatchTxFeesResponse{} }
@@ -1158,7 +1157,7 @@ func (m *BatchTxFeesResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_BatchTxFeesResponse proto.InternalMessageInfo
 
-func (m *BatchTxFeesResponse) GetFees() github_com_cosmos_cosmos_sdk_types.Coins {
+func (m *BatchTxFeesResponse) GetFees() []types.Coin {
 	if m != nil {
 		return m.Fees
 	}
@@ -3382,11 +3381,11 @@ type QueryClient interface {
 }
 
 type queryClient struct {
-	cc grpc1.ClientConn
+	cc *grpc.ClientConn
 }
 
 func NewQueryClient(cc grpc1.ClientConn) QueryClient {
-	return &queryClient{cc}
+	return &queryClient{}
 }
 
 func (c *queryClient) Params(ctx context.Context, in *ParamsRequest, opts ...grpc.CallOption) (*ParamsResponse, error) {
@@ -3857,7 +3856,7 @@ func (*UnimplementedQueryServer) EthereumEventVotes(ctx context.Context, req *Et
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
-	s.RegisterService(&_Query_serviceDesc, srv)
+	// s.RegisterService(&_Query_serviceDesc, srv)
 }
 
 func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {

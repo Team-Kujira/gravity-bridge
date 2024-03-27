@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -118,13 +119,13 @@ func (stce *SendToCosmosEvent) Validate() error {
 		return fmt.Errorf("ethereum contract address")
 	}
 	if stce.Amount.IsNegative() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "amount must be positive")
+		return errors.Wrap(sdkerrors.ErrInvalidCoins, "amount must be positive")
 	}
 	if !common.IsHexAddress(stce.EthereumSender) {
 		return fmt.Errorf("ethereum sender")
 	}
 	if _, err := sdk.AccAddressFromBech32(stce.CosmosReceiver); err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, stce.CosmosReceiver)
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, stce.CosmosReceiver)
 	}
 	return nil
 }

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
+	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/peggyjv/gravity-bridge/module/v4/x/gravity/types"
@@ -25,7 +26,7 @@ func (k Keeper) recordEventVote(
 	lastEventNonce := k.getLastEventNonceByValidator(ctx, val)
 	expectedNonce := lastEventNonce + 1
 	if event.GetEventNonce() != expectedNonce {
-		return nil, sdkerrors.Wrapf(types.ErrInvalid,
+		return nil, errors.Wrapf(types.ErrInvalid,
 			"non contiguous event nonce expected %v observed %v for validator %v",
 			expectedNonce,
 			event.GetEventNonce(),
@@ -75,14 +76,21 @@ func (k Keeper) TryEventVoteRecord(ctx sdk.Context, eventVoteRecord *types.Ether
 
 		// Sum the current powers of all validators who have voted and see if it passes the current threshold
 		// TODO: The different integer types and math here needs a careful review
-		requiredPower := types.EventVoteRecordPowerThreshold(k.StakingKeeper.GetLastTotalPower(ctx))
-		eventVotePower := sdk.NewInt(0)
+		lastTotalPower, err := k.StakingKeeper.GetLastTotalPower(ctx)
+		if err != nil {
+			panic(err)
+		}
+		requiredPower := types.EventVoteRecordPowerThreshold(lastTotalPower)
+		eventVotePower := math.NewInt(0)
 		for _, validator := range eventVoteRecord.Votes {
 			val, _ := sdk.ValAddressFromBech32(validator)
 
-			validatorPower := k.StakingKeeper.GetLastValidatorPower(ctx, val)
+			validatorPower, err := k.StakingKeeper.GetLastValidatorPower(ctx, val)
+			if err != nil {
+				panic(err)
+			}
 			// Add it to the attestation power's sum
-			eventVotePower = eventVotePower.Add(sdk.NewInt(validatorPower))
+			eventVotePower = eventVotePower.Add(math.NewInt(validatorPower))
 			// If the power of all the validators that have voted on the attestation is higher or equal to the threshold,
 			// process the attestation, set Observed to true, and break
 			if eventVotePower.GTE(requiredPower) {

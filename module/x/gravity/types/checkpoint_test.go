@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -26,8 +27,8 @@ func TestBatchTxCheckpoint(t *testing.T) {
 				Id:                0x1,
 				Sender:            senderAddr.String(),
 				EthereumRecipient: "0x9FC9C2DfBA3b6cF204C37a5F690619772b926e39",
-				Erc20Token:        NewSDKIntERC20Token(sdk.NewInt(0x1), erc20Addr),
-				Erc20Fee:          NewSDKIntERC20Token(sdk.NewInt(0x1), erc20Addr),
+				Erc20Token:        NewSDKIntERC20Token(math.NewInt(0x1), erc20Addr),
+				Erc20Fee:          NewSDKIntERC20Token(math.NewInt(0x1), erc20Addr),
 			},
 		},
 		TokenContract: erc20Addr.Hex(),
@@ -50,7 +51,7 @@ func TestContractCallTxCheckpoint(t *testing.T) {
 	invalidationId, err := hex.DecodeString("0x696e76616c69646174696f6e4964000000000000000000000000000000000000"[2:])
 	require.NoError(t, err)
 
-	token := []ERC20Token{NewSDKIntERC20Token(sdk.NewIntFromUint64(1), gethcommon.HexToAddress("0xC26eFfa98B8A2632141562Ae7E34953Cfe5B4888"))}
+	token := []ERC20Token{NewSDKIntERC20Token(math.NewIntFromUint64(1), gethcommon.HexToAddress("0xC26eFfa98B8A2632141562Ae7E34953Cfe5B4888"))}
 	call := ContractCallTx{
 		Tokens:            token,
 		Fees:              token,

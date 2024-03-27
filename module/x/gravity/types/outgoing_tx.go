@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"strings"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"cosmossdk.io/errors"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -84,7 +84,7 @@ func (u SignerSetTx) GetCheckpoint(gravityID []byte) []byte {
 	var checkpoint [32]uint8
 	copy(checkpoint[:], checkpointBytes[:])
 
-	u.Signers.Sort()
+	// u.Signers.Sort()
 
 	memberAddresses := make([]gethcommon.Address, len(u.Signers))
 	convertedPowers := make([]*big.Int, len(u.Signers))
@@ -210,11 +210,11 @@ func (c ContractCallTx) GetCheckpoint(gravityID []byte) []byte {
 func packCall(abiString, method string, args []interface{}) []byte {
 	encodedCall, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
-		panic(sdkerrors.Wrap(err, "bad ABI definition in code"))
+		panic(errors.Wrap(err, "bad ABI definition in code"))
 	}
 	abiEncodedCall, err := encodedCall.Pack(method, args...)
 	if err != nil {
-		panic(sdkerrors.Wrap(err, "packing checkpoint"))
+		panic(errors.Wrap(err, "packing checkpoint"))
 	}
 	return crypto.Keccak256Hash(abiEncodedCall[4:]).Bytes()
 }

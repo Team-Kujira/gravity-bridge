@@ -3,8 +3,8 @@ package v2_test
 import (
 	"testing"
 
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	v2 "github.com/peggyjv/gravity-bridge/module/v4/x/gravity/migrations/v2"
@@ -25,7 +25,7 @@ func TestStoreMigration(t *testing.T) {
 
 	// Check no params
 	require.False(t, paramstore.Has(ctx, types.ParamStoreConfirmedOutgoingTxWindow))
-	require.False(t, paramstore.Has(ctx, types.ParamStoreEventVoteWindow))
+	require.False(t, paramstore.Has(ctx, types.ParamStoreEthereumEventVoteWindow))
 
 	// Run migrations.
 	err := v2.MigrateParamStore(ctx, paramstore)
@@ -33,5 +33,5 @@ func TestStoreMigration(t *testing.T) {
 
 	// Make sure the new params are set.
 	require.True(t, paramstore.Has(ctx, types.ParamStoreConfirmedOutgoingTxWindow))
-	require.True(t, paramstore.Has(ctx, types.ParamStoreEventVoteWindow))
+	require.True(t, paramstore.Has(ctx, types.ParamStoreEthereumEventVoteWindow))
 }

@@ -6,8 +6,9 @@ import (
 	"sort"
 	"strconv"
 
+	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/peggyjv/gravity-bridge/module/v4/x/gravity/types"
@@ -79,7 +80,7 @@ func (k Keeper) batchTxExecuted(ctx sdk.Context, tokenContract common.Address, n
 		// If the iterated batches nonce is lower than the one that was just executed, cancel it
 		btx, ok := otx.(*types.BatchTx)
 		if !ok {
-			panic(sdkerrors.Wrapf(types.ErrInvalid, "couldn't cast to batch tx for %s", otx))
+			panic(errors.Wrapf(types.ErrInvalid, "couldn't cast to batch tx for %s", otx))
 		}
 
 		if (btx.BatchNonce < batchTx.BatchNonce) && (btx.TokenContract == batchTx.TokenContract) {
@@ -96,8 +97,8 @@ func (k Keeper) batchTxExecuted(ctx sdk.Context, tokenContract common.Address, n
 // have if created. This info is both presented to relayers for the purpose of determining
 // when to request batches and also used by the batch creation process to decide not to create
 // a new batch
-func (k Keeper) getBatchFeesByTokenType(ctx sdk.Context, tokenContractAddr common.Address, maxElements int) sdk.Int {
-	feeAmount := sdk.ZeroInt()
+func (k Keeper) getBatchFeesByTokenType(ctx sdk.Context, tokenContractAddr common.Address, maxElements int) math.Int {
+	feeAmount := math.ZeroInt()
 	i := 0
 	k.iterateUnbatchedSendToEthereumsByContract(ctx, tokenContractAddr, func(tx *types.SendToEthereum) bool {
 		feeAmount = feeAmount.Add(tx.Erc20Fee.Amount)
@@ -112,8 +113,8 @@ func (k Keeper) getBatchFeesByTokenType(ctx sdk.Context, tokenContractAddr commo
 // have if created. This info is both presented to relayers for the purpose of determining
 // when to request batches and also used by the batch creation process to decide not to create
 // a new batch
-func (k Keeper) GetBatchFeesByTokenType(ctx sdk.Context, tokenContractAddr common.Address, maxElements int) sdk.Int {
-	feeAmount := sdk.ZeroInt()
+func (k Keeper) GetBatchFeesByTokenType(ctx sdk.Context, tokenContractAddr common.Address, maxElements int) math.Int {
+	feeAmount := math.ZeroInt()
 	i := 0
 	k.iterateUnbatchedSendToEthereumsByContract(ctx, tokenContractAddr, func(tx *types.SendToEthereum) bool {
 		feeAmount = feeAmount.Add(tx.Erc20Fee.Amount)
@@ -168,7 +169,7 @@ func (k Keeper) GetUnsignedBatchTxs(ctx sdk.Context, val sdk.ValAddress) []*type
 		if len(sig) == 0 {
 			batch, ok := cotx.(*types.BatchTx)
 			if !ok {
-				panic(sdkerrors.Wrapf(types.ErrInvalid, "couldn't cast to batch tx for completed tx %s", cotx))
+				panic(errors.Wrapf(types.ErrInvalid, "couldn't cast to batch tx for completed tx %s", cotx))
 			}
 			unconfirmed = append(unconfirmed, batch)
 		}
@@ -179,7 +180,7 @@ func (k Keeper) GetUnsignedBatchTxs(ctx sdk.Context, val sdk.ValAddress) []*type
 		if len(sig) == 0 {
 			batch, ok := otx.(*types.BatchTx)
 			if !ok {
-				panic(sdkerrors.Wrapf(types.ErrInvalid, "couldn't cast to batch tx for %s", otx))
+				panic(errors.Wrapf(types.ErrInvalid, "couldn't cast to batch tx for %s", otx))
 			}
 			unconfirmed = append(unconfirmed, batch)
 		}

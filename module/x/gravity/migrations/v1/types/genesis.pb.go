@@ -6,12 +6,12 @@ package types
 import (
 	fmt "fmt"
 	types "github.com/cosmos/cosmos-sdk/codec/types"
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	sdkmath "cosmossdk.io/math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -98,10 +98,10 @@ type Params struct {
 	AverageBlockTime         uint64 `protobuf:"varint,11,opt,name=average_block_time,json=averageBlockTime,proto3" json:"average_block_time,omitempty"`
 	AverageEthereumBlockTime uint64 `protobuf:"varint,12,opt,name=average_ethereum_block_time,json=averageEthereumBlockTime,proto3" json:"average_ethereum_block_time,omitempty"`
 	// TODO: slash fraction for contract call txs too
-	SlashFractionSignerSetTx                  github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,13,opt,name=slash_fraction_signer_set_tx,json=slashFractionSignerSetTx,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_signer_set_tx"`
-	SlashFractionBatch                        github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,14,opt,name=slash_fraction_batch,json=slashFractionBatch,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_batch"`
-	SlashFractionEthereumSignature            github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,15,opt,name=slash_fraction_ethereum_signature,json=slashFractionEthereumSignature,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_ethereum_signature"`
-	SlashFractionConflictingEthereumSignature github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=slash_fraction_conflicting_ethereum_signature,json=slashFractionConflictingEthereumSignature,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_conflicting_ethereum_signature"`
+	SlashFractionSignerSetTx                  sdkmath.LegacyDec `protobuf:"bytes,13,opt,name=slash_fraction_signer_set_tx,json=slashFractionSignerSetTx,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_signer_set_tx"`
+	SlashFractionBatch                        sdkmath.LegacyDec `protobuf:"bytes,14,opt,name=slash_fraction_batch,json=slashFractionBatch,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_batch"`
+	SlashFractionEthereumSignature            sdkmath.LegacyDec `protobuf:"bytes,15,opt,name=slash_fraction_ethereum_signature,json=slashFractionEthereumSignature,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_ethereum_signature"`
+	SlashFractionConflictingEthereumSignature sdkmath.LegacyDec `protobuf:"bytes,16,opt,name=slash_fraction_conflicting_ethereum_signature,json=slashFractionConflictingEthereumSignature,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"slash_fraction_conflicting_ethereum_signature"`
 	UnbondSlashingSignerSetTxsWindow          uint64                                 `protobuf:"varint,17,opt,name=unbond_slashing_signer_set_txs_window,json=unbondSlashingSignerSetTxsWindow,proto3" json:"unbond_slashing_signer_set_txs_window,omitempty"`
 }
 

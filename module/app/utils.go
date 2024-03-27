@@ -5,47 +5,46 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/tendermint/tendermint/libs/log"
+	// "cosmossdk.io/log"
 	dbm "github.com/tendermint/tm-db"
 
+	// "cosmossdk.io/simapp/helpers"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/simapp/helpers"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 )
 
-// SetupSimulation creates the config, db (levelDB), temporary directory and logger for
-// the simulation tests. If `FlagEnabledValue` is false it skips the current test.
-// Returns error on an invalid db intantiation or temp dir creation.
-func SetupSimulation(dirPrefix, dbName string) (simtypes.Config, dbm.DB, string, log.Logger, bool, error) {
-	if !FlagEnabledValue {
-		return simtypes.Config{}, nil, "", nil, true, nil
-	}
+// // SetupSimulation creates the config, db (levelDB), temporary directory and logger for
+// // the simulation tests. If `FlagEnabledValue` is false it skips the current test.
+// // Returns error on an invalid db intantiation or temp dir creation.
+// func SetupSimulation(dirPrefix, dbName string) (simtypes.Config, dbm.DB, string, log.Logger, bool, error) {
+// 	if !FlagEnabledValue {
+// 		return simtypes.Config{}, nil, "", nil, true, nil
+// 	}
 
-	config := NewConfigFromFlags()
-	config.ChainID = helpers.SimAppChainID
+// 	config := NewConfigFromFlags()
+// 	config.ChainID = helpers.SimAppChainID
 
-	var logger log.Logger
-	if FlagVerboseValue {
-		logger = log.TestingLogger()
-	} else {
-		logger = log.NewNopLogger()
-	}
+// 	var logger log.Logger
+// 	if FlagVerboseValue {
+// 		logger = log.TestingLogger()
+// 	} else {
+// 		logger = log.NewNopLogger()
+// 	}
 
-	dir, err := ioutil.TempDir("", dirPrefix)
-	if err != nil {
-		return simtypes.Config{}, nil, "", nil, false, err
-	}
+// 	dir, err := ioutil.TempDir("", dirPrefix)
+// 	if err != nil {
+// 		return simtypes.Config{}, nil, "", nil, false, err
+// 	}
 
-	db, err := sdk.NewLevelDB(dbName, dir)
-	if err != nil {
-		return simtypes.Config{}, nil, "", nil, false, err
-	}
+// 	db, err := sdk.NewLevelDB(dbName, dir)
+// 	if err != nil {
+// 		return simtypes.Config{}, nil, "", nil, false, err
+// 	}
 
-	return config, db, dir, logger, false, nil
-}
+// 	return config, db, dir, logger, false, nil
+// }
 
 // SimulationOperations retrieves the simulation params from the provided file path
 // and returns all the modules weighted operations
@@ -67,8 +66,6 @@ func SimulationOperations(app Gravity, cdc codec.JSONCodec, config simtypes.Conf
 		}
 	}
 
-	simState.ParamChanges = app.SimulationManager().GenerateParamChanges(config.Seed)
-	simState.Contents = app.SimulationManager().GetProposalContents(simState)
 	return app.SimulationManager().WeightedOperations(simState)
 }
 
@@ -79,7 +76,7 @@ func CheckExportSimulation(
 ) error {
 	if config.ExportStatePath != "" {
 		fmt.Println("exporting app state...")
-		exported, err := app.ExportAppStateAndValidators(false, nil)
+		exported, err := app.ExportAppStateAndValidators(false, nil, nil)
 		if err != nil {
 			return err
 		}
@@ -112,7 +109,7 @@ func PrintStats(db dbm.DB) {
 
 // GetSimulationLog unmarshals the KVPair's Value to the corresponding type based on the
 // each's module store key and the prefix bytes of the KVPair's key.
-func GetSimulationLog(storeName string, sdr sdk.StoreDecoderRegistry, kvAs, kvBs []kv.Pair) (log string) {
+func GetSimulationLog(storeName string, sdr simtypes.StoreDecoderRegistry, kvAs, kvBs []kv.Pair) (log string) {
 	for i := 0; i < len(kvAs); i++ {
 		if len(kvAs[i].Value) == 0 && len(kvBs[i].Value) == 0 {
 			// skip if the value doesn't have any bytes

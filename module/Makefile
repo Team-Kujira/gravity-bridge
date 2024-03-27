@@ -92,8 +92,8 @@ proto-format:
 proto-gen:
 	@echo "Generating Protobuf files"
 	# todo: figure out why this old method was failing
-	# $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace tendermintdev/sdk-proto-gen:v0.1 sh ./contrib/local/protocgen.sh
-	@sh ./contrib/local/protocgen.sh
+	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace tendermintdev/sdk-proto-gen:v0.1 sh ./contrib/local/protocgen.sh
+	# @sh ./contrib/local/protocgen.sh
 
 proto-lint:
 	@$(DOCKER_BUF) lint --error-format=json
