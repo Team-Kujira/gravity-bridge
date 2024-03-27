@@ -8,7 +8,6 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
@@ -41,7 +40,7 @@ func TestSignerSetTxCreationUponUnbonding(t *testing.T) {
 	smallValAddr := keeper.ValAddrs[4]
 	smallVal, _ := input.StakingKeeper.GetValidator(input.Context, smallValAddr)
 	unbondAmount := math.LegacyNewDec(smallVal.GetBondedTokens().Int64())
-	_, err := input.StakingKeeper.Undelegate(
+	_, _, err := input.StakingKeeper.Undelegate(
 		input.Context,
 		sdk.AccAddress(smallValAddr),
 		smallValAddr,
@@ -50,7 +49,7 @@ func TestSignerSetTxCreationUponUnbonding(t *testing.T) {
 	require.NoError(t, err)
 
 	// Run the staking endblocker to ensure signer set tx is set in state
-	staking.EndBlocker(input.Context, input.StakingKeeper)
+	input.StakingKeeper.EndBlocker(input.Context)
 
 	// power diff should be less than 5%
 	latestSignerSetTx := input.GravityKeeper.GetLatestSignerSetTx(input.Context)
@@ -70,7 +69,7 @@ func TestSignerSetTxCreationUponUnbonding(t *testing.T) {
 	input.Context = input.Context.WithBlockHeight(input.Context.BlockHeight() + 1)
 
 	undelegateAmount := math.LegacyNewDec(keeper.StakingAmount.Quo(math.NewInt(3)).Int64())
-	_, err = input.StakingKeeper.Undelegate(
+	_, _, err = input.StakingKeeper.Undelegate(
 		input.Context,
 		sdk.AccAddress(keeper.ValAddrs[0]),
 		keeper.ValAddrs[0],
@@ -78,7 +77,7 @@ func TestSignerSetTxCreationUponUnbonding(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	staking.EndBlocker(input.Context, input.StakingKeeper)
+	input.StakingKeeper.EndBlocker(input.Context)
 
 	// last unbonding height should not be the current block
 	lastUnbondingHeight = input.GravityKeeper.GetLastUnbondingBlockHeight(input.Context)
@@ -104,7 +103,8 @@ func TestSignerSetTxSlashing_SignerSetTxCreated_Before_ValidatorBonded(t *testin
 	gravity.EndBlocker(ctx, pk)
 
 	// ensure that the  validator who is bonded after signer set tx is created is not slashed
-	val := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0])
+	val, err := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0])
+	require.NoError(t, err)
 	require.False(t, val.IsJailed())
 }
 
@@ -131,11 +131,13 @@ func TestSignerSetTxSlashing_SignerSetTxCreated_After_ValidatorBonded(t *testing
 	gravity.EndBlocker(ctx, pk)
 
 	// ensure that the  validator who is bonded before signer set tx is created is slashed
-	val := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0])
+	val, err := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0])
+	require.NoError(t, err)
 	require.True(t, val.IsJailed())
 
 	// ensure that the  validator who attested the signer set tx is not slashed.
-	val = input.StakingKeeper.Validator(ctx, keeper.ValAddrs[1])
+	val, err = input.StakingKeeper.Validator(ctx, keeper.ValAddrs[1])
+	require.NoError(t, err)
 	require.False(t, val.IsJailed())
 
 }
@@ -183,18 +185,20 @@ func TestSignerSetTxSlashing_UnbondingValidator_UnbondWindow_NotExpired(t *testi
 		}
 		gravityKeeper.SetEthereumSignature(ctx, &types.SignerSetTxConfirmation{vs.Nonce, keeper.EthAddrs[i].Hex(), []byte("dummySig")}, val)
 	}
-	staking.EndBlocker(input.Context, input.StakingKeeper)
+	input.StakingKeeper.EndBlocker(input.Context)
 
 	ctx = ctx.WithBlockHeight(currentBlockHeight)
 	gravity.EndBlocker(ctx, gravityKeeper)
 
 	// Assertions
-	val1 := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0])
+	val1, err := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0])
+	require.NoError(t, err)
 	require.True(t, val1.IsJailed())
 	fmt.Println("val1  tokens", val1.GetTokens())
 	// check if tokens are slashed for val1.
 
-	val2 := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[1])
+	val2, err := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[1])
+	require.NoError(t, err)
 	require.True(t, val2.IsJailed())
 	fmt.Println("val2  tokens", val2.GetTokens())
 	// check if tokens shouldn't be slashed for val2.
@@ -244,7 +248,7 @@ func TestTxSlashingAndPruning(t *testing.T) {
 		}
 		if i == 1 {
 			// don't sign with 2nd validator. set val bond height > batch block height
-			validator := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[i])
+			validator, _ := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[i])
 			valConsAddr, _ := validator.GetConsAddr()
 			valSigningInfo := slashingtypes.ValidatorSigningInfo{StartHeight: int64(batchExecuted.Height + 1)}
 			input.SlashingKeeper.SetValidatorSigningInfo(ctx, valConsAddr, valSigningInfo)
@@ -265,17 +269,21 @@ func TestTxSlashingAndPruning(t *testing.T) {
 	}
 
 	// validator 3 is unbonding and doesn't sign the a signer set tx.
-	validator3 := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2])
+	validator3, _ := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2])
 	input.StakingKeeper.InsertUnbondingValidatorQueue(ctx, validator3.(stakingtypes.Validator))
 
 	gravity.BeginBlocker(ctx, gravityKeeper)
 	gravity.EndBlocker(ctx, gravityKeeper)
 
 	// ensure that the  validator is jailed and slashed
-	require.True(t, input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0]).IsJailed())
+	val1, err := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[0])
+	require.NoError(t, err)
+	require.True(t, val1.IsJailed())
 
 	// ensure that the 2nd  validator is not jailed and slashed
-	require.False(t, input.StakingKeeper.Validator(ctx, keeper.ValAddrs[1]).IsJailed())
+	val2, err := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[1])
+	require.NoError(t, err)
+	require.False(t, val2.IsJailed())
 
 	// Ensure that the last slashed ougoing tx block height is set properly
 	require.Equal(t, gravityKeeper.GetLastSlashedOutgoingTxBlockHeight(ctx), batchExecuted.Height)
@@ -307,7 +315,9 @@ func TestTxSlashingAndPruning(t *testing.T) {
 
 	// validator 3 should not have be slashed for not signing contract calls and batches because
 	// it is unbonding
-	require.False(t, input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2]).IsJailed())
+	val3, err := input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2])
+	require.NoError(t, err)
+	require.False(t, val3.IsJailed())
 
 	signerSetNotExecuted := &types.SignerSetTx{
 		Nonce:  1,
@@ -339,7 +349,9 @@ func TestTxSlashingAndPruning(t *testing.T) {
 	require.NotNil(t, gravityKeeper.GetCompletedOutgoingTx(ctx, signerSetExecuted.GetStoreIndex()))
 
 	// validator 3 shouldn't be jailed yet
-	require.False(t, input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2]).IsJailed())
+	val3, err = input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2])
+	require.NoError(t, err)
+	require.False(t, val3.IsJailed())
 
 	// setting validator 3 to unbonding should have triggered a new signer set in begin blocker
 	require.EqualValues(t, 3, gravityKeeper.GetLatestSignerSetTxNonce(ctx))
@@ -355,7 +367,9 @@ func TestTxSlashingAndPruning(t *testing.T) {
 	require.EqualValues(t, 3, gravityKeeper.GetLatestSignerSetTxNonce(ctx))
 
 	// validator 3 should be slashed for not signing the signer set txs
-	require.True(t, input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2]).IsJailed())
+	val3, err = input.StakingKeeper.Validator(ctx, keeper.ValAddrs[2])
+	require.NoError(t, err)
+	require.True(t, val3.IsJailed())
 }
 
 func TestSignerSetTxEmission(t *testing.T) {

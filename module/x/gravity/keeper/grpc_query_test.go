@@ -222,7 +222,9 @@ func TestKeeper_UnsignedSignerSetTxs(t *testing.T) {
 		gk := env.GravityKeeper
 		orchAddr := keeper.AccAddrs[0]
 		signer := orchAddr.String()
-		valAddr, err := sdk.ValAddressFromBech32(env.StakingKeeper.GetValidators(ctx, 5)[0].OperatorAddress)
+		allVals, err := env.StakingKeeper.GetValidators(ctx, 5)
+		require.NoError(t, err)
+		valAddr, err := sdk.ValAddressFromBech32(allVals[0].OperatorAddress)
 		require.NoError(t, err)
 
 		{ // setup
@@ -259,7 +261,9 @@ func TestKeeper_UnsignedBatchTxs(t *testing.T) {
 		gk := env.GravityKeeper
 		orchAddr := keeper.AccAddrs[0]
 		signer := orchAddr.String()
-		valAddr, err := sdk.ValAddressFromBech32(env.StakingKeeper.GetValidators(ctx, 5)[0].OperatorAddress)
+		allVals, err := env.StakingKeeper.GetValidators(ctx, 5)
+		require.NoError(t, err)
+		valAddr, err := sdk.ValAddressFromBech32(allVals[0].OperatorAddress)
 		require.NoError(t, err)
 
 		// setup
@@ -311,7 +315,9 @@ func TestKeeper_UnsignedContractCallTxs(t *testing.T) {
 		gk := env.GravityKeeper
 		orchAddr := keeper.AccAddrs[0]
 		signer := orchAddr.String()
-		valAddr, err := sdk.ValAddressFromBech32(env.StakingKeeper.GetValidators(ctx, 5)[0].OperatorAddress)
+		allVals, err := env.StakingKeeper.GetValidators(ctx, 5)
+		require.NoError(t, err)
+		valAddr, err := sdk.ValAddressFromBech32(allVals[0].OperatorAddress)
 		require.NoError(t, err)
 
 		{ // setup

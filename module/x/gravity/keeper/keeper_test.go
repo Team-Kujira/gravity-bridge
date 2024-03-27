@@ -46,7 +46,10 @@ func TestCurrentValsetNormalization(t *testing.T) {
 			}
 			input.GravityKeeper.StakingKeeper = NewStakingKeeperWeightedMock(operators...)
 			r := input.GravityKeeper.CreateSignerSetTx(ctx)
-			assert.Equal(t, spec.expPowers, r.Signers.GetPowers())
+			assert.Equal(t, len(spec.expPowers), len(r.Signers))
+			for i, expPower := range spec.expPowers {
+				assert.Equal(t, expPower, r.Signers[i].Power)
+			}
 		})
 	}
 }

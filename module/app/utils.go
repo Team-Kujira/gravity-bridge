@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	// "github.com/tendermint/tendermint/libs/log"
+	// "cosmossdk.io/log"
 	dbm "github.com/tendermint/tm-db"
 
 	// "cosmossdk.io/simapp/helpers"

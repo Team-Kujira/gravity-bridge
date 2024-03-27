@@ -9,7 +9,7 @@ package cmd
 
 // 	"github.com/spf13/viper"
 // 	"github.com/stretchr/testify/require"
-// 	"github.com/tendermint/tendermint/libs/log"
+// 	"cosmossdk.io/log"
 
 // 	"cosmossdk.io/simapp"
 // 	"github.com/cosmos/cosmos-sdk/client"

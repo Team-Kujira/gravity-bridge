@@ -28,7 +28,7 @@ package app
 // 	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
 // 	"github.com/stretchr/testify/require"
 // 	abci "github.com/tendermint/tendermint/abci/types"
-// 	"github.com/tendermint/tendermint/libs/log"
+// 	"cosmossdk.io/log"
 // 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 // 	dbm "github.com/tendermint/tm-db"
 // )

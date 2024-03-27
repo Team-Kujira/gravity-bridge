@@ -385,7 +385,8 @@ func TestEmptyBatch(t *testing.T) {
 func TestGetUnconfirmedBatchTxs(t *testing.T) {
 	input, ctx := SetupFiveValChain(t)
 	gk := input.GravityKeeper
-	vals := input.StakingKeeper.GetAllValidators(ctx)
+	vals, err := input.StakingKeeper.GetAllValidators(ctx)
+	require.NoError(t, err)
 	val1, err := sdk.ValAddressFromBech32(vals[0].OperatorAddress)
 	require.NoError(t, err)
 	val2, err := sdk.ValAddressFromBech32(vals[1].OperatorAddress)
